@@ -3,6 +3,11 @@
 // idea by Francesco Ganassin
 // for a swarm of insects 
 // sonic presence in the village of Stramare - Segusino (TV) - Italy
+//
+// ideal breakout is very compact, 
+// powered by a LiPo battery, recharged by mini solar panel
+// Leonardo Micro Pro and MozzyByte shield
+// mini speaker 40mm 4 Ohm 3-5W
 // ------------------------------------------------------------------
 
 #include <MozziGuts.h>
@@ -14,13 +19,20 @@
 #include <EventDelay.h>
 #include <mozzi_rand.h>
 
-const int MIN_CARRIER_FREQ = 10; // se gli insetti sono in un posto non molto luminoso meglio aumentare
+// if in low light environment consider 
+// increasing min paramenters: 
+// min_carrier_freq
+// min_intensity
+// min-mod_speed
+//
+
+const int MIN_CARRIER_FREQ = 10; // increase in low light
 const int MAX_CARRIER_FREQ = 70;
 
-const int MIN_INTENSITY = 0; // idem
+const int MIN_INTENSITY = 0; // increase in low light
 const int MAX_INTENSITY = 80;
 
-const int MIN_MOD_SPEED = 40; // idem
+const int MIN_MOD_SPEED = 40; // increase in low light
 const int MAX_MOD_SPEED = 6000;
 
 AutoMap kMapCarrierFreq(0,1023,MIN_CARRIER_FREQ,MAX_CARRIER_FREQ);
@@ -31,14 +43,18 @@ const int LDR0_PIN=0; // queste sono le letture dalle fotoresistenze
 const int LDR1_PIN=1; 
 const int LDR2_PIN=2; 
 
-Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aCarrier(COS2048_DATA); // si possono usare anche oscillatori sinusoidali
+// here also SIN oscillators could be used
+
+Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aCarrier(COS2048_DATA); 
 Oscil<COS2048_NUM_CELLS, AUDIO_RATE> aModulator(COS2048_DATA);
 Oscil<COS2048_NUM_CELLS, CONTROL_RATE> kIntensityMod(COS2048_DATA);
 
 EventDelay kGainChangeDelay;
 char gain = 1;
 
-int mod_ratio = 30; // brightness (harmonics) - più alto il numero, più acuto e penetrante il verso del grillo
+// brightness (harmonics) 
+// the higher the number, the brighter the sound
+int mod_ratio = 30; 
 long fm_intensity; // carries control info from updateControl to updateAudio
 
 float smoothness = 0.01f;
@@ -52,7 +68,7 @@ void setup(){
 void updateControl(){
  if(kGainChangeDelay.ready()){
     gain = 1-gain; 
-    kGainChangeDelay.start(); // manda a zero il volume periodicamente
+    kGainChangeDelay.start(); // sends periodically the volume to zero
  }
 
   int LDR0_value = mozziAnalogRead(LDR0_PIN); // value is 0-1023
@@ -82,8 +98,9 @@ void updateControl(){
   Serial.print(LDR2_value);
   Serial.print("\t"); 
 
-// qui appaiono un po' di parametri ambientali 
-// e altri parametri random
+// here are both
+// environmental paramenters 
+// random parameters
 
   float mod_speed = (float)kMapModSpeed(LDR2_value)/(1200*(rand((byte) 20))); Serial.print("   mod_speed = ");
   Serial.print(mod_speed);
@@ -91,7 +108,8 @@ void updateControl(){
 
   Serial.println(); 
   
-  // anche qui si può inserire un fattore timidezza del grillo oltre al random
+  // here there is the possibility of changing the shyness of the insect
+  // there is a randomic shyness, a straight parameter could be added
   
    kGainChangeDelay.set((rand((byte) 400))*200); 
 }
